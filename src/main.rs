@@ -162,7 +162,6 @@ struct AppState {
     // Share Wifi Network QR Code overlay fields
     show_share_overlay: bool,
     share_ssid: String,
-    share_password: String,
     share_auth: String,
     share_qr_lines: Vec<String>,
     share_box: TextBox,
@@ -191,6 +190,11 @@ struct AppState {
     selection_start: Option<(u16, u16)>,
     selection_end: Option<(u16, u16)>,
     selection_pending_copy: bool,
+    quit_btn_bounds: Option<(u16, u16, u16)>,
+    help_btn_bounds: Option<(u16, u16, u16)>,
+    drag_active: bool,
+    drag_start_cursor: Option<(i32, i32)>,
+    drag_start_window: Option<(i32, i32)>,
 }
 
 impl AppState {
@@ -215,7 +219,6 @@ impl AppState {
             hidden_box: TextBox::default(),
             show_share_overlay: false,
             share_ssid: String::new(),
-            share_password: String::new(),
             share_auth: String::new(),
             share_qr_lines: Vec::new(),
             share_box: TextBox::default(),
@@ -237,6 +240,11 @@ impl AppState {
             selection_start: None,
             selection_end: None,
             selection_pending_copy: false,
+            quit_btn_bounds: None,
+            help_btn_bounds: None,
+            drag_active: false,
+            drag_start_cursor: None,
+            drag_start_window: None,
         }
     }
 
@@ -293,6 +301,11 @@ impl AppState {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = config::AppConfig::load();
+    win32::relaunch_in_conhost_if_needed();
+
+    logger::set_event_log_enabled(config.enable_event_log);
+
     logger::log_message("INFO", "rwif application starting up...");
     
     let _instance_guard = match SingleInstanceGuard::try_new() {
@@ -310,14 +323,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _ = execute!(stdout, ratatui::crossterm::terminal::SetSize(110, 38));
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
     
-    let _borderless = BorderlessConsole::enable();
+    let _borderless = if config.enable_borderless {
+        Some(BorderlessConsole::enable())
+    } else {
+        None
+    };
     std::thread::sleep(Duration::from_millis(50)); // Allow dimensions settle delay
+
+    if _borderless.is_none() {
+        win32::center_console_window();
+    }
 
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
     let mut app = AppState::new();
-    let config = config::AppConfig::load();
     
     // Initial Scan
     app.scan_wifi(true);
@@ -366,6 +386,70 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
                 Event::Mouse(mouse_event) => {
                     match mouse_event.kind {
+                        event::MouseEventKind::Down(event::MouseButton::Left) => {
+                            let mut clicked_btn = false;
+                            if let Some((btn_y, btn_start, btn_end)) = app.quit_btn_bounds {
+                                if mouse_event.row == btn_y && mouse_event.column >= btn_start && mouse_event.column < btn_end {
+                                    app.should_quit = true;
+                                    clicked_btn = true;
+                                }
+                            }
+                            if !clicked_btn {
+                                if let Some((btn_y, btn_start, btn_end)) = app.help_btn_bounds {
+                                    if mouse_event.row == btn_y && mouse_event.column >= btn_start && mouse_event.column < btn_end {
+                                        app.show_help = !app.show_help;
+                                        app.set_status(if app.show_help {
+                                            "Help overlay active. Press ESC/q to close.".to_string()
+                                        } else {
+                                            "Help overlay closed.".to_string()
+                                        }, false);
+                                        clicked_btn = true;
+                                    }
+                                }
+                            }
+                            if !clicked_btn {
+                                if mouse_event.row <= 2 {
+                                    if let Some(cursor_pos) = win32::query_cursor_pos() {
+                                        if let Some(rect) = win32::get_window_rect() {
+                                            app.drag_active = true;
+                                            app.drag_start_cursor = Some(cursor_pos);
+                                            app.drag_start_window = Some((rect.left, rect.top));
+                                        }
+                                    }
+                                } else {
+                                    app.selection_start = Some((mouse_event.column, mouse_event.row));
+                                    app.selection_end = Some((mouse_event.column, mouse_event.row));
+                                    app.selection_pending_copy = false;
+                                }
+                            }
+                        }
+                        event::MouseEventKind::Drag(event::MouseButton::Left) => {
+                            if app.drag_active {
+                                if let (Some(start_cursor), Some(start_window)) = (app.drag_start_cursor, app.drag_start_window) {
+                                    if let Some(curr_cursor) = win32::query_cursor_pos() {
+                                        let dx = curr_cursor.0 - start_cursor.0;
+                                        let dy = curr_cursor.1 - start_cursor.1;
+                                        win32::set_window_pos(start_window.0 + dx, start_window.1 + dy);
+                                    }
+                                }
+                            } else if app.selection_start.is_some() {
+                                app.selection_end = Some((mouse_event.column, mouse_event.row));
+                            }
+                        }
+                        event::MouseEventKind::Up(event::MouseButton::Left) => {
+                            if app.drag_active {
+                                app.drag_active = false;
+                                app.drag_start_cursor = None;
+                                app.drag_start_window = None;
+                            } else if let (Some(start), Some(end)) = (app.selection_start, app.selection_end) {
+                                if start != end {
+                                    app.selection_pending_copy = true;
+                                } else {
+                                    app.selection_start = None;
+                                    app.selection_end = None;
+                                }
+                            }
+                        }
                         event::MouseEventKind::ScrollUp => {
                             if app.show_markdown.is_some() {
                                 app.markdown_scroll = app.markdown_scroll.saturating_sub(3);
@@ -963,6 +1047,35 @@ fn handle_keypress(app: &mut AppState, code: KeyCode, theme: &ThemeColors) {
 }
 
 fn draw_ui(f: &mut ratatui::Frame, app: &mut AppState, theme: &ThemeColors) {
+    let size = f.area();
+    if size.width < 100 || size.height < 35 {
+        let block = Block::default()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(Color::Rgb(255, 85, 85)))
+            .title(Span::styled(
+                " ⚠️  Terminal Sizing Warning ",
+                Style::default().fg(Color::Rgb(255, 85, 85)).add_modifier(Modifier::BOLD),
+            ));
+
+        let text = vec![
+            Line::from(""),
+            Line::from(Span::styled("Layout Constraints Not Met", Style::default().fg(Color::Rgb(255, 85, 85)).add_modifier(Modifier::BOLD))),
+            Line::from(""),
+            Line::from(format!("  Current Terminal Size: {}x{}", size.width, size.height)),
+            Line::from("  Minimum Required Size: 100x35"),
+            Line::from(""),
+            Line::from("  Please resize or maximize your terminal window to resume standard rendering."),
+        ];
+        let p = Paragraph::new(text)
+            .block(block)
+            .alignment(ratatui::layout::Alignment::Center);
+
+        let area = centered_rect(80, 50, size);
+        f.render_widget(Clear, area);
+        f.render_widget(p, area);
+        return;
+    }
+
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -970,7 +1083,7 @@ fn draw_ui(f: &mut ratatui::Frame, app: &mut AppState, theme: &ThemeColors) {
             Constraint::Min(5),    // 1: Body
             Constraint::Length(3), // 2: Footer Status
         ])
-        .split(f.area());
+        .split(size);
 
     // 1. Header
     let username = std::env::var("USERNAME").unwrap_or_else(|_| "user".to_string());
@@ -979,17 +1092,78 @@ fn draw_ui(f: &mut ratatui::Frame, app: &mut AppState, theme: &ThemeColors) {
 
     let header_block = Block::default()
         .borders(Borders::ALL)
-        .border_style(Style::default().fg(theme.border));
+        .border_style(Style::default().fg(theme.border))
+        .title(Span::styled(" Rust Wi-Fi Manager ", Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)));
 
-    let header_line = Line::from(vec![
-        Span::styled(" rWifi v2.5.0 ", Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)),
-        Span::styled(" │ ", Style::default().fg(theme.border)),
-        Span::styled("Press h for help", Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)),
-        Span::styled(" │ ", Style::default().fg(theme.border)),
-        Span::styled(format!("{}@{}", username, hostname), Style::default().fg(Color::Rgb(255, 215, 0)).add_modifier(Modifier::BOLD)),
-        Span::styled(" │ ", Style::default().fg(theme.border)),
-        Span::styled(os_version, Style::default().fg(theme.text_main)),
-    ]);
+    let ver_str = format!(" rWifi v{} ", env!("CARGO_PKG_VERSION"));
+    let user_host_str = format!("{}@{}", username, hostname);
+    let os_str_val = os_version.clone();
+
+    let button_y = chunks[0].y + 1;
+    let inner_width = chunks[0].width.saturating_sub(2) as usize;
+    let left_len = ver_str.len() + 3 + user_host_str.len() + 3 + os_str_val.len();
+    let right_len = 6 + 3 + 6;
+
+    let header_line = if inner_width > left_len + right_len {
+        let padding_len = inner_width - (left_len + right_len);
+        let padding_str = " ".repeat(padding_len);
+
+        let help_offset = 1 + left_len + padding_len;
+        let help_start_x = chunks[0].x + help_offset as u16;
+        let help_end_x = help_start_x + 6;
+        app.help_btn_bounds = Some((button_y, help_start_x, help_end_x));
+
+        let quit_offset = help_offset + 6 + 3;
+        let quit_start_x = chunks[0].x + quit_offset as u16;
+        let quit_end_x = quit_start_x + 6;
+        app.quit_btn_bounds = Some((button_y, quit_start_x, quit_end_x));
+
+        Line::from(vec![
+            Span::styled(ver_str, Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)),
+            Span::styled(" │ ", Style::default().fg(theme.border)),
+            Span::styled(user_host_str, Style::default().fg(Color::Rgb(255, 215, 0)).add_modifier(Modifier::BOLD)),
+            Span::styled(" │ ", Style::default().fg(theme.border)),
+            Span::styled(os_str_val, Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)),
+            Span::styled(padding_str, Style::default()),
+            // Help button
+            Span::styled(" ", Style::default().bg(Color::Rgb(250, 210, 50)).fg(Color::Black).add_modifier(Modifier::BOLD)),
+            Span::styled("h", Style::default().bg(Color::Rgb(250, 210, 50)).fg(Color::Black).add_modifier(Modifier::BOLD | Modifier::UNDERLINED)),
+            Span::styled("elp ", Style::default().bg(Color::Rgb(250, 210, 50)).fg(Color::Black).add_modifier(Modifier::BOLD)),
+            Span::styled(" │ ", Style::default().fg(theme.border)),
+            // Quit button
+            Span::styled(" ", Style::default().bg(Color::Rgb(255, 85, 85)).fg(Color::White).add_modifier(Modifier::BOLD)),
+            Span::styled("q", Style::default().bg(Color::Rgb(255, 85, 85)).fg(Color::White).add_modifier(Modifier::BOLD | Modifier::UNDERLINED)),
+            Span::styled("uit ", Style::default().bg(Color::Rgb(255, 85, 85)).fg(Color::White).add_modifier(Modifier::BOLD)),
+        ])
+    } else {
+        let help_offset = 1 + ver_str.len() + 3 + user_host_str.len() + 3 + os_str_val.len() + 3;
+        let help_start_x = chunks[0].x + help_offset as u16;
+        let help_end_x = help_start_x + 6;
+        app.help_btn_bounds = Some((button_y, help_start_x, help_end_x));
+
+        let quit_offset = help_offset + 6 + 3;
+        let quit_start_x = chunks[0].x + quit_offset as u16;
+        let quit_end_x = quit_start_x + 6;
+        app.quit_btn_bounds = Some((button_y, quit_start_x, quit_end_x));
+
+        Line::from(vec![
+            Span::styled(ver_str, Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)),
+            Span::styled(" │ ", Style::default().fg(theme.border)),
+            Span::styled(user_host_str, Style::default().fg(Color::Rgb(255, 215, 0)).add_modifier(Modifier::BOLD)),
+            Span::styled(" │ ", Style::default().fg(theme.border)),
+            Span::styled(os_str_val, Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)),
+            Span::styled(" │ ", Style::default().fg(theme.border)),
+            // Help button
+            Span::styled(" ", Style::default().bg(Color::Rgb(250, 210, 50)).fg(Color::Black).add_modifier(Modifier::BOLD)),
+            Span::styled("h", Style::default().bg(Color::Rgb(250, 210, 50)).fg(Color::Black).add_modifier(Modifier::BOLD | Modifier::UNDERLINED)),
+            Span::styled("elp ", Style::default().bg(Color::Rgb(250, 210, 50)).fg(Color::Black).add_modifier(Modifier::BOLD)),
+            Span::styled(" │ ", Style::default().fg(theme.border)),
+            // Quit button
+            Span::styled(" ", Style::default().bg(Color::Rgb(255, 85, 85)).fg(Color::White).add_modifier(Modifier::BOLD)),
+            Span::styled("q", Style::default().bg(Color::Rgb(255, 85, 85)).fg(Color::White).add_modifier(Modifier::BOLD | Modifier::UNDERLINED)),
+            Span::styled("uit ", Style::default().bg(Color::Rgb(255, 85, 85)).fg(Color::White).add_modifier(Modifier::BOLD)),
+        ])
+    };
 
     f.render_widget(header_block, chunks[0]);
     f.render_widget(Paragraph::new(header_line), chunks[0].inner(Margin { horizontal: 1, vertical: 1 }));
@@ -1566,6 +1740,81 @@ fn draw_ui(f: &mut ratatui::Frame, app: &mut AppState, theme: &ThemeColors) {
             .scroll((app.markdown_scroll as u16, 0));
 
         f.render_widget(paragraph, area);
+    }
+
+    // Handle Mouse Selection Highlights & Clipboard Copy
+    if let (Some(start), Some(end)) = (app.selection_start, app.selection_end) {
+        let buf = f.buffer_mut();
+        let width = buf.area.width;
+        let height = buf.area.height;
+
+        let (col1, row1) = start;
+        let (col2, row2) = end;
+
+        let is_selected = |x: u16, y: u16| -> bool {
+            let (c1, r1) = (col1, row1);
+            let (c2, r2) = (col2, row2);
+            if r1 == r2 {
+                y == r1 && x >= c1.min(c2) && x <= c1.max(c2)
+            } else if r1 < r2 {
+                (y == r1 && x >= c1) || (y > r1 && y < r2) || (y == r2 && x <= c2)
+            } else {
+                (y == r2 && x >= c2) || (y > r2 && y < r1) || (y == r1 && x <= c1)
+            }
+        };
+
+        // 1. Draw Highlight
+        for y in 0..height {
+            for x in 0..width {
+                if is_selected(x, y) {
+                    let cell = &mut buf[(x, y)];
+                    cell.set_bg(Color::Rgb(0, 120, 215));
+                    cell.set_fg(Color::White);
+                }
+            }
+        }
+
+        // 2. Perform Copy on Release
+        if app.selection_pending_copy {
+            let mut selected_text = String::new();
+            let mut current_row: Option<u16> = None;
+            let mut current_line = String::new();
+
+            for y in 0..height {
+                for x in 0..width {
+                    if is_selected(x, y) {
+                        let cell = &buf[(x, y)];
+                        if current_row != Some(y) {
+                            if current_row.is_some() {
+                                selected_text.push_str(current_line.trim_end());
+                                selected_text.push('\n');
+                                current_line.clear();
+                            }
+                            current_row = Some(y);
+                        }
+                        current_line.push_str(cell.symbol());
+                    }
+                }
+            }
+            if !current_line.is_empty() {
+                selected_text.push_str(current_line.trim_end());
+            }
+
+            if !selected_text.is_empty() {
+                let _ = win32::copy_text_to_clipboard(&selected_text);
+                let truncated = if selected_text.len() > 30 {
+                    format!("{}...", &selected_text[..27].replace('\n', " "))
+                } else {
+                    selected_text.replace('\n', " ")
+                };
+                app.status_msg = format!("📋 Copied selection to clipboard: {}", truncated);
+                app.status_ttl = 6000;
+            }
+
+            app.selection_start = None;
+            app.selection_end = None;
+            app.selection_pending_copy = false;
+        }
     }
 }
 
