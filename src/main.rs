@@ -338,9 +338,27 @@ impl AppState {
     }
 }
 
+#[cfg(windows)]
+unsafe extern "system" {
+    fn GetConsoleWindow() -> *mut std::ffi::c_void;
+    fn ShowWindow(hWnd: *mut std::ffi::c_void, nCmdShow: i32) -> i32;
+    fn SetForegroundWindow(hWnd: *mut std::ffi::c_void) -> i32;
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = config::AppConfig::load();
     win32::relaunch_in_conhost_if_needed();
+
+    #[cfg(windows)]
+    let hwnd = unsafe {
+        let h = GetConsoleWindow();
+        if !h.is_null() {
+            ShowWindow(h, 0); // SW_HIDE = 0
+            Some(h)
+        } else {
+            None
+        }
+    };
 
     logger::set_event_log_enabled(config.enable_event_log);
 
@@ -370,6 +388,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if _borderless.is_none() {
         win32::center_console_window();
+    }
+
+    #[cfg(windows)]
+    if let Some(h) = hwnd {
+        unsafe {
+            ShowWindow(h, 5); // SW_SHOW = 5
+            SetForegroundWindow(h);
+        }
     }
 
     let backend = CrosstermBackend::new(stdout);
