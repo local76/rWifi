@@ -16,4 +16,6 @@ build() {
 
 package() {
 	install -Dm755 target/release/rwifi "$pkgdir"/usr/bin/rwifi
+	install -Dm644 packaging/desktop/rwifi.desktop "$pkgdir"/usr/share/applications/rwifi.desktop
+	install -Dm644 assets/brand/app_icon.png "$pkgdir"/usr/share/pixmaps/rwifi.png
 }

@@ -6,6 +6,8 @@ echo "Building Debian package..."
 
 # Create staging directory structure
 mkdir -p debian/usr/bin
+mkdir -p debian/usr/share/applications
+mkdir -p debian/usr/share/pixmaps
 mkdir -p ../../dist/packages
 
 # Locate and copy binary
@@ -22,8 +24,15 @@ fi
 
 chmod 755 debian/usr/bin/rwifi
 
+# Copy desktop file and icon
+cp ../desktop/rwifi.desktop debian/usr/share/applications/rwifi.desktop
+cp ../../assets/brand/app_icon.png debian/usr/share/pixmaps/rwifi.png
+chmod 644 debian/usr/share/applications/rwifi.desktop
+chmod 644 debian/usr/share/pixmaps/rwifi.png
+
 # Run dpkg-deb to build the package
 dpkg-deb --build debian ../../dist/packages/rwifi.deb
 
-# Clean up staging binary
+# Clean up staging files
 rm -f debian/usr/bin/rwifi
+rm -rf debian/usr/share
