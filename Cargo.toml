@@ -1,6 +1,6 @@
-[package]
+﻿[package]
 name = "rwifi"
-version = "3.1.0"
+version = "3.1.2"
 edition = "2024"
 
 [dependencies]
@@ -48,3 +48,4 @@ assets = [
 
 [patch."https://github.com/local76/rCommon.git"]
 rcommon = { path = "../rCommon" }
+

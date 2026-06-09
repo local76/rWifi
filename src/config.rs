@@ -30,13 +30,30 @@ impl Default for AppConfig {
 }
 
 impl AppConfig {
-    /// Resolves path to `%APPDATA%\rWifi\config.yaml`
+    /// Resolves path to the per-app config file.
+    /// Windows: `%APPDATA%\rWifi\config.yaml`
+    /// Linux / macOS: `$XDG_CONFIG_HOME/rWifi/config.yaml` (falls back to `~/.config/rWifi/config.yaml`)
     pub fn config_path() -> Option<PathBuf> {
-        std::env::var("APPDATA").ok().map(|appdata| {
-            std::path::PathBuf::from(appdata)
-                .join("rWifi")
-                .join("config.yaml")
-        })
+        if cfg!(target_os = "windows") {
+            let appdata = std::env::var("APPDATA").ok()?;
+            Some(
+                std::path::PathBuf::from(appdata)
+                    .join("rWifi")
+                    .join("config.yaml"),
+            )
+        } else {
+            // Linux / macOS XDG_CONFIG_HOME fallback
+            let base = std::env::var("XDG_CONFIG_HOME")
+                .ok()
+                .map(PathBuf::from)
+                .or_else(|| {
+                    std::env::var("HOME")
+                        .ok()
+                        .map(|h| PathBuf::from(h).join(".config"))
+                })
+                .unwrap_or_else(|| PathBuf::from(".config"));
+            Some(base.join("rWifi").join("config.yaml"))
+        }
     }
 
     /// Load config from file, fallback to default if missing or invalid.

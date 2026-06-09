@@ -14,13 +14,26 @@ pub fn is_event_log_enabled() -> bool {
     EVENT_LOG_ENABLED.load(Ordering::Relaxed)
 }
 
-/// Helper to resolve the standard AppData folder for diagnostics logging.
+/// Helper to resolve the per-app log file path.
+/// Windows: `%APPDATA%\rWifi\log.txt`
+/// Linux / macOS: `$XDG_DATA_HOME/rWifi/log.txt` (falls back to `~/.local/share/rWifi/log.txt`)
 pub fn get_appdata_log_path() -> Option<PathBuf> {
-    std::env::var("APPDATA").ok().map(|appdata| {
-        std::path::PathBuf::from(appdata)
-            .join("rWifi")
-            .join("log.txt")
-    })
+    if cfg!(target_os = "windows") {
+        let appdata = std::env::var("APPDATA").ok()?;
+        Some(PathBuf::from(appdata).join("rWifi").join("log.txt"))
+    } else {
+        // Linux / macOS XDG_DATA_HOME fallback
+        let base = std::env::var("XDG_DATA_HOME")
+            .ok()
+            .map(PathBuf::from)
+            .or_else(|| {
+                std::env::var("HOME")
+                    .ok()
+                    .map(|h| PathBuf::from(h).join(".local").join("share"))
+            })
+            .unwrap_or_else(|| PathBuf::from(".local/share"));
+        Some(base.join("rWifi").join("log.txt"))
+    }
 }
 
 /// Thread-safe silent logger helper that appends diagnostic logs to a local file.
