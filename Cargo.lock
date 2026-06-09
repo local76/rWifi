@@ -292,6 +292,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
+name = "library"
+version = "4.2.0"
+dependencies = [
+ "crossterm",
+ "ratatui",
+ "rusqlite",
+ "sysinfo",
+ "windows",
+ "windows-sys 0.59.0",
+ "winreg",
+]
+
+[[package]]
 name = "libsqlite3-sys"
 version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -460,19 +473,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rcommon"
-version = "4.2.0"
-dependencies = [
- "crossterm",
- "ratatui",
- "rusqlite",
- "sysinfo",
- "windows",
- "windows-sys 0.59.0",
- "winreg",
-]
-
-[[package]]
 name = "redox_syscall"
 version = "0.5.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -515,21 +515,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
-name = "rwifi"
-version = "3.1.0"
-dependencies = [
- "crossterm",
- "qrcodegen",
- "ratatui",
- "rcommon",
- "sysinfo",
- "windows",
- "windows-sys 0.59.0",
- "winreg",
- "winres",
-]
-
-[[package]]
 name = "ryu"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -540,6 +525,21 @@ name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
+
+[[package]]
+name = "scout"
+version = "3.1.2"
+dependencies = [
+ "crossterm",
+ "library",
+ "qrcodegen",
+ "ratatui",
+ "sysinfo",
+ "windows",
+ "windows-sys 0.59.0",
+ "winreg",
+ "winres",
+]
 
 [[package]]
 name = "serde"
