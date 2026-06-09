@@ -1,4 +1,0 @@
-#!/bin/sh
-set -e
-echo "Preparing to remove rwifi..."
-exit 0
