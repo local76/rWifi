@@ -1,4 +1,4 @@
-#[path = "../wlan.rs"]
+#[path = "../wlan/mod.rs"]
 mod wlan;
 
 #[cfg(not(windows))]

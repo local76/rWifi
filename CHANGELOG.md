@@ -2,16 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [3.1.0] - 2026-06-08
 
 ### Changed
-- **Renamed project** from `rWifi` to `rWifi-tui`. The GitHub repository, Cargo package name, binary name, and all user-facing labels now use the `-tui` suffix to make the program's role as a terminal user interface explicit (matching `rTemplate-tui`).
-  - Repository: `local76/rWifi` → `local76/rWifi-tui`
-  - Crate/binary: `rwifi` → `rwifi-tui`
-  - Console title: `rWifi` → `rWifi-tui`
-  - Config file: `%APPDATA%\rWifi\config.yaml` → `%APPDATA%\rWifi-tui\config.yaml`
-  - Log file: `%APPDATA%\rWifi\log.txt` → `%APPDATA%\rWifi-tui\log.txt`
-  - Linux package names: `rwifi` → `rwifi-tui`
+- Renamed project back from `rWifi-tui` to `rWifi` (crate name: `rwifi`, binary name: `rwifi`).
+- Split monolithic `src/wlan.rs` (1276 lines) into modular `src/wlan/` files (all under 500 lines).
+- Split monolithic `src/main.rs` (2025 lines) into `src/app/`, `src/ui/`, and `src/win32.rs` submodules (all under 500 lines).
+- Fixed the selection highlight bug where single mouse clicks on TUI list items or buttons incorrectly triggered full-line selection and clipboard copy.
+- Introduced a drag threshold check to prevent mouse clicks from starting text selection unless a drag occurs.
 
 ## [3.0.1] - 2026-06-06
 ### Added
