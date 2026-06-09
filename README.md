@@ -1,64 +1,83 @@
-scout-tui
+# scout
 
-A local terminal-based WiFi connection and management utility.
+> A local WiFi scanner and connection manager.
 
-How to Install:
-- exe / msi / deb / rpm: Download from the releases page (https://github.com/local76/scout-tui/releases)
-- winget: winget install local76.scout-tui
-- aur: yay -S scout-tui-bin
+`scout` is a single-binary TUI for scanning nearby WiFi networks, viewing signal strength, and connecting / disconnecting. Runs on Windows and Linux with no admin elevation (uses the OS's standard WiFi API; only writes that require elevation are surfaced with a clear prompt).
 
-## Embedding library screensaver effects (library 4.2+)
+`scout` is part of the [local76](https://github.com/local76/local76) ecosystem and depends on [`library`](https://github.com/local76/library) for its TUI widgets and design system.
 
-As of library 4.2, all 10 r* screensaver effects (glyphs, beams,
-bounce, flame, gnats, bursts, cosmos, disco, storm,
-chaos) are consolidated into the `library::role::application::scenes`
-module. If your `Cargo.toml` enables the `scenes` feature, you can
-embed any r* effect into this app's TUI without a separate crate:
+---
 
-```rust
-use library::core::screensaver::Screensaver;
-use library::core::TerminalCell;
-use library::role::application::scenes::matrix::Matrix;
+## Features
 
-// In a Ratatui draw closure:
-let mut effect = Matrix::new();
-let mut grid = vec![TerminalCell::default(); cols * rows];
-effect.update(std::time::Duration::from_millis(16), cols, rows);
-effect.draw(&mut grid, cols, rows);
+- **SSID scan.** Lists every visible network with SSID, BSSID, signal bars, channel, security type.
+- **Connect / disconnect.** Pick a network, enter the PSK, connect. Saved networks get a one-tap reconnect.
+- **Live signal updates.** Signal bars update at 1-second intervals as the user moves.
+- **Per-network history.** Last-seen, signal trend (rising / falling / stable).
+- **Saved profiles.** Stored in the OS's standard credential store (Windows: Credential Manager, Linux: NetworkManager secrets).
+
+---
+
+## Install
+
+### Windows
+- **Standalone**: download `scout.exe` from the [latest release](https://github.com/local76/scout/releases).
+- **winget**: `winget install local76.scout`
+- **MSI**: download the `.msi` from the releases page.
+
+### Linux
+- **Debian/Ubuntu**: `sudo dpkg -i scout.deb`
+- **Red Hat/Fedora**: `sudo rpm -i scout.rpm`
+- **Arch (AUR)**: `yay -S scout-bin`
+
+Requires `NetworkManager` and `nmcli` on Linux.
+
+---
+
+## Usage
+
+```
+scout                      # launch the TUI scanner
+scout scan                 # one-shot scan, print SSIDs to stdout
+scout connect <ssid>       # connect to a saved network
+scout disconnect           # disconnect the active network
+scout saved                # list saved profiles
+scout --version
+scout --help
 ```
 
-Available types in library 4.2:
-- `scenes::matrix::Matrix`
-- `scenes::beams::Beams`
-- `scenes::bhop::BhopDashboard`
-- `scenes::fire::FireEffect`
-- `scenes::fireflies::Fireflies`
-- `scenes::fireworks::Fireworks`
-- `scenes::life::LifeEffect`
-- `scenes::party::Party`
-- `scenes::pour::Pour`
-- `scenes::unstable::Unstable`
+Inside the TUI:
 
-To run an effect as a standalone terminal screensaver (own raw-tty
-loop, Ctrl-C to exit), use `library::screensaver_runtime::run_main`:
+| Key | Action |
+|---|---|
+| `↑` / `↓` | Move selection |
+| `Enter` | Connect to the selected network (prompts for PSK) |
+| `c` | Connect to a saved network |
+| `d` | Disconnect the active network |
+| `r` | Rescan |
+| `q` | Quit |
 
-```rust
-fn main() {
-    library::screensaver_runtime::run_main(
-        library::role::application::scenes::matrix::Matrix::new(),
-        "glyphs",
-    );
-}
+---
+
+## Configuration
+
+A YAML config file is auto-generated on first run:
+
+- **Windows**: `%APPDATA%\scout\config.yaml`
+- **Linux**: `~/.config/scout/config.yaml`
+
+---
+
+## Build from source
+
+```pwsh
+git clone https://github.com/local76/scout.git
+cd scout
+cargo build --release
 ```
 
-The `screensaver_runtime` module is gated on the `screensaver-runtime`
-feature (default-off) — enable it in your Cargo.toml if your app needs
-to host a screensaver process directly.
+---
 
-For the design system surface (status bar, toast, markdown viewer,
-theme + accent colors, layout guard, 12 canonical TUI effects),
-import the design façade:
+## License
 
-```rust
-use library::interface::tui::design::prelude::*;
-```
+MIT. See [LICENSE.md](LICENSE.md).
