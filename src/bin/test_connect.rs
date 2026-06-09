@@ -1,3 +1,4 @@
+#![allow(unused)]
 #[path = "../wlan/mod.rs"]
 mod wlan;
 
