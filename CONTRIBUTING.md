@@ -1,1 +1,1 @@
-https://github.com/local76/rWifi/pulls
+https://github.com/local76/scout/pulls

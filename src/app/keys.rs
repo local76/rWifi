@@ -185,14 +185,14 @@ pub fn handle_keypress(app: &mut AppState, code: KeyCode, theme: &ThemeColors) {
                         match win32::connect_to_enterprise_wifi(&net.ssid, &app.eap_username, &text_val, &net) {
                             Ok(_) => {
                                 app.set_status(format!("Successfully connected to enterprise {}", net.ssid), false);
-                                win32::show_toast_notification("rWifi - Connected", &format!("Connected to {}", net.ssid));
-                                win32::log_windows_event("rWifi", 4, 1001, &format!("Successfully connected to {}", net.ssid));
+                                win32::show_toast_notification("scout - Connected", &format!("Connected to {}", net.ssid));
+                                win32::log_windows_event("scout", 4, 1001, &format!("Successfully connected to {}", net.ssid));
                                 app.scan_wifi(false);
                             }
                             Err(err) => {
                                 app.set_status(format!("Failed to connect: {}", err), true);
-                                win32::show_toast_notification("rWifi - Connection Failed", &format!("Failed to connect to {}: {}", net.ssid, err));
-                                win32::log_windows_event("rWifi", 1, 1002, &format!("Failed to connect to {}: {}", net.ssid, err));
+                                win32::show_toast_notification("scout - Connection Failed", &format!("Failed to connect to {}: {}", net.ssid, err));
+                                win32::log_windows_event("scout", 1, 1002, &format!("Failed to connect to {}: {}", net.ssid, err));
                             }
                         }
                     } else {
@@ -208,14 +208,14 @@ pub fn handle_keypress(app: &mut AppState, code: KeyCode, theme: &ThemeColors) {
                         match win32::connect_to_wifi(&net.ssid, pwd_param.map(|s| s.as_str()), &net_param) {
                             Ok(_) => {
                                 app.set_status(format!("Successfully connected to {}", net.ssid), false);
-                                win32::show_toast_notification("rWifi - Connected", &format!("Connected to {}", net.ssid));
-                                win32::log_windows_event("rWifi", 4, 1001, &format!("Successfully connected to {}", net.ssid));
+                                win32::show_toast_notification("scout - Connected", &format!("Connected to {}", net.ssid));
+                                win32::log_windows_event("scout", 4, 1001, &format!("Successfully connected to {}", net.ssid));
                                 app.scan_wifi(false);
                             }
                             Err(err) => {
                                 app.set_status(format!("Failed to connect: {}", err), true);
-                                win32::show_toast_notification("rWifi - Connection Failed", &format!("Failed to connect to {}: {}", net.ssid, err));
-                                win32::log_windows_event("rWifi", 1, 1002, &format!("Failed to connect to {}: {}", net.ssid, err));
+                                win32::show_toast_notification("scout - Connection Failed", &format!("Failed to connect to {}: {}", net.ssid, err));
+                                win32::log_windows_event("scout", 1, 1002, &format!("Failed to connect to {}: {}", net.ssid, err));
                             }
                         }
                     }
@@ -400,7 +400,7 @@ pub fn handle_keypress(app: &mut AppState, code: KeyCode, theme: &ThemeColors) {
                     match win32::disconnect_wifi(&net.interface_guid) {
                         Ok(_) => {
                             app.set_status(format!("Disconnected from {}", net.ssid), false);
-                            win32::show_toast_notification("rWifi - Disconnected", &format!("Disconnected from {}", net.ssid));
+                            win32::show_toast_notification("scout - Disconnected", &format!("Disconnected from {}", net.ssid));
                             app.scan_wifi(false);
                         }
                         Err(e) => {
@@ -412,13 +412,13 @@ pub fn handle_keypress(app: &mut AppState, code: KeyCode, theme: &ThemeColors) {
                     match win32::connect_to_wifi(&net.ssid, None, &net) {
                         Ok(_) => {
                             app.set_status(format!("Successfully connected to {}", net.ssid), false);
-                            win32::show_toast_notification("rWifi - Connected", &format!("Connected to {}", net.ssid));
-                            win32::log_windows_event("rWifi", 4, 1001, &format!("Successfully connected to {}", net.ssid));
+                            win32::show_toast_notification("scout - Connected", &format!("Connected to {}", net.ssid));
+                            win32::log_windows_event("scout", 4, 1001, &format!("Successfully connected to {}", net.ssid));
                             app.scan_wifi(false);
                         }
                         Err(e) => {
                             app.set_status(format!("Failed to connect: {}", e), true);
-                            win32::show_toast_notification("rWifi - Connection Failed", &format!("Failed to connect to {}: {}", net.ssid, e));
+                            win32::show_toast_notification("scout - Connection Failed", &format!("Failed to connect to {}: {}", net.ssid, e));
                         }
                     }
                 } else {
@@ -482,7 +482,7 @@ pub fn handle_keypress(app: &mut AppState, code: KeyCode, theme: &ThemeColors) {
                         Ok(_) => {
                             app.set_status(format!("Wi-Fi Radio successfully turned {}.", if target_state { "On" } else { "Off" }), false);
                             win32::show_toast_notification(
-                                "rWifi - Radio Toggled",
+                                "scout - Radio Toggled",
                                 &format!("Wi-Fi Radio turned {}", if target_state { "On" } else { "Off" })
                             );
                             app.scan_wifi(true);

@@ -15,12 +15,12 @@ pub fn is_event_log_enabled() -> bool {
 }
 
 /// Helper to resolve the per-app log file path.
-/// Windows: `%APPDATA%\rWifi\log.txt`
-/// Linux / macOS: `$XDG_DATA_HOME/rWifi/log.txt` (falls back to `~/.local/share/rWifi/log.txt`)
+/// Windows: `%APPDATA%\scout\log.txt`
+/// Linux / macOS: `$XDG_DATA_HOME/scout/log.txt` (falls back to `~/.local/share/scout/log.txt`)
 pub fn get_appdata_log_path() -> Option<PathBuf> {
     if cfg!(target_os = "windows") {
         let appdata = std::env::var("APPDATA").ok()?;
-        Some(PathBuf::from(appdata).join("rWifi").join("log.txt"))
+        Some(PathBuf::from(appdata).join("scout").join("log.txt"))
     } else {
         // Linux / macOS XDG_DATA_HOME fallback
         let base = std::env::var("XDG_DATA_HOME")
@@ -32,7 +32,7 @@ pub fn get_appdata_log_path() -> Option<PathBuf> {
                     .map(|h| PathBuf::from(h).join(".local").join("share"))
             })
             .unwrap_or_else(|| PathBuf::from(".local/share"));
-        Some(base.join("rWifi").join("log.txt"))
+        Some(base.join("scout").join("log.txt"))
     }
 }
 
@@ -61,6 +61,6 @@ pub fn log_message(level: &str, msg: &str) {
             "WARNING" => 0x0002,         // EVENTLOG_WARNING_TYPE
             _ => 0x0004,                 // EVENTLOG_INFORMATION_TYPE
         };
-        library::event_log::log_system_event("rwifi", event_type, 1000, msg);
+        library::event_log::log_system_event("scout", event_type, 1000, msg);
     }
 }

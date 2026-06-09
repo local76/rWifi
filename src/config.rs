@@ -31,14 +31,14 @@ impl Default for AppConfig {
 
 impl AppConfig {
     /// Resolves path to the per-app config file.
-    /// Windows: `%APPDATA%\rWifi\config.yaml`
-    /// Linux / macOS: `$XDG_CONFIG_HOME/rWifi/config.yaml` (falls back to `~/.config/rWifi/config.yaml`)
+    /// Windows: `%APPDATA%\scout\config.yaml`
+    /// Linux / macOS: `$XDG_CONFIG_HOME/scout/config.yaml` (falls back to `~/.config/scout/config.yaml`)
     pub fn config_path() -> Option<PathBuf> {
         if cfg!(target_os = "windows") {
             let appdata = std::env::var("APPDATA").ok()?;
             Some(
                 std::path::PathBuf::from(appdata)
-                    .join("rWifi")
+                    .join("scout")
                     .join("config.yaml"),
             )
         } else {
@@ -52,7 +52,7 @@ impl AppConfig {
                         .map(|h| PathBuf::from(h).join(".config"))
                 })
                 .unwrap_or_else(|| PathBuf::from(".config"));
-            Some(base.join("rWifi").join("config.yaml"))
+            Some(base.join("scout").join("config.yaml"))
         }
     }
 
@@ -110,7 +110,7 @@ impl AppConfig {
         }
 
         let content = format!(
-            "# rWifi Local Configuration\n\
+            "# scout Local Configuration\n\
 			 # -------------------------\n\n\
 			 theme_mode: {}\n\
 			 refresh_rate_ms: {}\n\

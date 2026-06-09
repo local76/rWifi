@@ -322,7 +322,7 @@ pub fn draw_help_overlay(f: &mut Frame, _app: &mut AppState, theme: &ThemeColors
     let help_block = Block::default()
         .borders(Borders::ALL)
         .border_style(Style::default().fg(theme.accent))
-        .title(Span::styled(" rWifi Keyboard Shortcuts ", Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)));
+        .title(Span::styled(" scout Keyboard Shortcuts ", Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)));
 
     let mut help_lines = Vec::new();
     help_lines.push(Line::from(""));

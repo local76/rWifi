@@ -52,21 +52,21 @@
 
 │   ├── binaries/                                     # Folder for raw, un-packaged compiled executables
 
-│   │   ├── rwifi                                 # Compiled raw binary for Linux
+│   │   ├── scout                                 # Compiled raw binary for Linux
 
-│   │   └── rwifi.exe                             # Compiled raw binary for Windows
+│   │   └── scout.exe                             # Compiled raw binary for Windows
 
 │   └── packages/                                     # Folder for final bundled distribution formats
 
-│       ├── rwifi.apk                             # Compiled Alpine Linux package
+│       ├── scout.apk                             # Compiled Alpine Linux package
 
-│       ├── rwifi.appimage                        # Compiled universal Linux portable executable
+│       ├── scout.appimage                        # Compiled universal Linux portable executable
 
-│       ├── rwifi.deb                             # Compiled Debian/Ubuntu installation package
+│       ├── scout.deb                             # Compiled Debian/Ubuntu installation package
 
-│       ├── rwifi.msi                             # Compiled Windows installer package
+│       ├── scout.msi                             # Compiled Windows installer package
 
-│       └── rwifi.rpm                             # Compiled RedHat/Fedora installation package
+│       └── scout.rpm                             # Compiled RedHat/Fedora installation package
 
 ├── docs/                                             # Deep-dive documentation for users/contributors
 
@@ -98,15 +98,15 @@
 
 │   │   ├── generate-completions.sh                   # Script to auto-generate below files via Rust 'clap'
 
-│   │   ├── rwifi.bash                            # Auto-completion logic for Bash shell
+│   │   ├── scout.bash                            # Auto-completion logic for Bash shell
 
-│   │   ├── rwifi.fish                            # Auto-completion logic for Fish shell
+│   │   ├── scout.fish                            # Auto-completion logic for Fish shell
 
-│   │   ├── rwifi.nu                              # Auto-completion logic for Nushell
+│   │   ├── scout.nu                              # Auto-completion logic for Nushell
 
-│   │   ├── rwifi.ps1                             # Auto-completion logic for PowerShell
+│   │   ├── scout.ps1                             # Auto-completion logic for PowerShell
 
-│   │   └── rwifi.zsh                             # Auto-completion logic for Zsh shell
+│   │   └── scout.zsh                             # Auto-completion logic for Zsh shell
 
 │   ├── deb/                                          # Debian/Ubuntu package environment
 
@@ -122,15 +122,15 @@
 
 │   ├── desktop/                                      # Standard Linux desktop integration files
 
-│   │   ├── rwifi.1                               # Linux man page documentation for terminal users
+│   │   ├── scout.1                               # Linux man page documentation for terminal users
 
-│   │   └── rwifi.desktop                         # Linux application launcher shortcut and metadata
+│   │   └── scout.desktop                         # Linux application launcher shortcut and metadata
 
 │   ├── flatpak/                                      # Flatpak sandboxed application environment
 
 │   │   ├── build-flatpak.sh                          # Isolated script to execute 'flatpak-builder'
 
-│   │   └── org.local76.rwifi.yaml                # Flatpak manifest defining dependencies
+│   │   └── org.local76.scout.yaml                # Flatpak manifest defining dependencies
 
 │   ├── nix/                                          # NixOS / Nix package manager environment
 
@@ -142,7 +142,7 @@
 
 │   │   ├── build-redhat-rpm.sh                       # Isolated script to set up rpmbuild tree and execute
 
-│   │   └── rwifi.spec                            # RPM specification file (Name, Version, %prep, %build)
+│   │   └── scout.spec                            # RPM specification file (Name, Version, %prep, %build)
 
 │   ├── winget/                                       # Windows Package Manager environment
 

@@ -1,5 +1,5 @@
 #![allow(deprecated)]
-//! rWifi: Terminal User Interface WiFi network manager for Windows.
+//! scout: Terminal User Interface WiFi network manager for Windows.
 //!
 //! **Taxonomy Classification**: Application Coordinator.
 
@@ -47,7 +47,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _hwnd = win32::hide_console_at_startup();
 
     logger::set_event_log_enabled(config.enable_event_log);
-    logger::log_message("INFO", "rwifi application starting up...");
+    logger::log_message("INFO", "scout application starting up...");
     
     let _instance_guard = match win32::SingleInstanceGuard::try_new() {
         Ok(g) => g,
@@ -57,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    let _title_guard = win32::ConsoleTitleGuard::new("rWifi");
+    let _title_guard = win32::ConsoleTitleGuard::new("scout");
 
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -77,7 +77,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     #[cfg(windows)]
     {
-        // Re-show the console window after TUI init (parity with rFetch/rMonitor).
+        // Re-show the console window after TUI init (parity with helm/pulse).
         unsafe extern "system" {
             fn ShowWindow(hWnd: *mut std::ffi::c_void, nCmdShow: i32) -> i32;
             fn SetForegroundWindow(hWnd: *mut std::ffi::c_void) -> i32;

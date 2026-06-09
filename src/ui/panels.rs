@@ -23,7 +23,7 @@ pub fn draw_header(f: &mut Frame, app: &mut AppState, theme: &ThemeColors, area:
         .border_style(Style::default().fg(theme.border))
         .title(Span::styled(" Rust Wi-Fi Manager ", Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)));
 
-    let ver_str = format!(" rWifi v{} ", env!("CARGO_PKG_VERSION"));
+    let ver_str = format!(" scout v{} ", env!("CARGO_PKG_VERSION"));
     let user_host_str = format!("{}@{}", username, hostname);
     let os_str_val = os_version;
 
