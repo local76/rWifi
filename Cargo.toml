@@ -8,7 +8,7 @@ ratatui = "0.29"
 crossterm = "0.28"
 sysinfo = "0.30"
 qrcodegen = "1.8.0"
-library = { git = "https://github.com/local76/library.git", branch = "main", features = ["widgets", "sys-info", "window", "clipboard", "notification", "event-log", "scenes"] }
+library = { path = "../library", features = ["widgets", "sys-info", "window", "clipboard", "notification", "event-log", "scenes"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.56.0"
@@ -45,7 +45,4 @@ assets = [
     { source = "assets/brand/app_icon.png", dest = "/usr/share/pixmaps/scout.png", mode = "644" },
     { source = "packaging/desktop/scout.desktop", dest = "/usr/share/applications/scout.desktop", mode = "644" }
 ]
-
-[patch."https://github.com/local76/library.git"]
-library = { path = "../library" }
 
