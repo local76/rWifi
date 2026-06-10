@@ -1,6 +1,6 @@
 [package]
 name = "scout"
-version = "2026.6.10"
+version = "2026.6.11"
 edition = "2024"
 
 [dependencies]
@@ -8,7 +8,7 @@ ratatui = { version = "0.30", default-features = false, features = ["termwiz"] }
 crossterm = "0.28"
 sysinfo = "0.30"
 qrcodegen = "1.8.0"
-library = { path = "../library", features = ["widgets", "sys-info", "window", "clipboard", "notification", "event-log", "scenes"] }
+library = { path = "../library", features = ["widgets", "sys-info", "window", "clipboard", "notification", "event-log", "scenes", "chrome"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.56.0"

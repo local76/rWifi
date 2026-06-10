@@ -7,9 +7,9 @@ use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyEventKind};
 use library::apps::tui_bootstrap::{bootstrap_tui, shutdown_tui, TuiBootstrapConfig};
+use library::lifecycle::background::file_log::{log_message, set_event_log_enabled, set_log_app_name};
 
 mod config;
-mod logger;
 mod backend;
 mod win32;
 mod app;
@@ -35,8 +35,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(windows)]
     let _hwnd = win32::hide_console_at_startup();
 
-    logger::set_event_log_enabled(config.enable_event_log);
-    logger::log_message("INFO", "scout application starting up...");
+    set_log_app_name("app/scout");
+    set_event_log_enabled(config.enable_event_log);
+    log_message("INFO", "scout application starting up...");
     
     let mut tui_config = TuiBootstrapConfig::new("scout");
     tui_config.borderless = config.enable_borderless;

@@ -243,57 +243,12 @@ pub fn handle_keypress(app: &mut AppState, code: KeyCode, theme: &ThemeColors) {
     }
 
     // Global override for F1-F7 documentation keys
-    match code {
-        KeyCode::F(1) => {
-            app.show_help = false;
-            app.show_markdown = Some("README.md".to_string());
-            app.markdown_lines = parse_markdown_to_lines(crate::README_CONTENT, theme);
-            app.markdown_scroll = 0;
-            return;
-        }
-        KeyCode::F(2) => {
-            app.show_help = false;
-            app.show_markdown = Some("SUPPORT.md".to_string());
-            app.markdown_lines = parse_markdown_to_lines(crate::SUPPORT_CONTENT, theme);
-            app.markdown_scroll = 0;
-            return;
-        }
-        KeyCode::F(3) => {
-            app.show_help = false;
-            app.show_markdown = Some("LICENSE.md".to_string());
-            app.markdown_lines = parse_markdown_to_lines(crate::LICENSE_CONTENT, theme);
-            app.markdown_scroll = 0;
-            return;
-        }
-        KeyCode::F(4) => {
-            app.show_help = false;
-            app.show_markdown = Some("COPYRIGHT.md".to_string());
-            app.markdown_lines = parse_markdown_to_lines(crate::COPYRIGHT_CONTENT, theme);
-            app.markdown_scroll = 0;
-            return;
-        }
-        KeyCode::F(5) => {
-            app.show_help = false;
-            app.show_markdown = Some("PRIVACY.md".to_string());
-            app.markdown_lines = parse_markdown_to_lines(crate::PRIVACY_CONTENT, theme);
-            app.markdown_scroll = 0;
-            return;
-        }
-        KeyCode::F(6) => {
-            app.show_help = false;
-            app.show_markdown = Some("SECURITY.md".to_string());
-            app.markdown_lines = parse_markdown_to_lines(crate::SECURITY_CONTENT, theme);
-            app.markdown_scroll = 0;
-            return;
-        }
-        KeyCode::F(7) => {
-            app.show_help = false;
-            app.show_markdown = Some("CONTRIBUTING.md".to_string());
-            app.markdown_lines = parse_markdown_to_lines(crate::CONTRIBUTING_CONTENT, theme);
-            app.markdown_scroll = 0;
-            return;
-        }
-        _ => {}
+    if let Some(name) = library::apps::chrome::open_embedded_markdown(code) {
+        app.show_help = false;
+        app.show_markdown = Some(name.to_string());
+        app.markdown_lines = parse_markdown_to_lines(doc_content(name), theme);
+        app.markdown_scroll = 0;
+        return;
     }
 
     if app.show_help {
@@ -551,5 +506,21 @@ pub fn handle_keypress(app: &mut AppState, code: KeyCode, theme: &ThemeColors) {
             app.show_help = true;
         }
         _ => {}
+    }
+}
+
+/// Resolve a doc filename (e.g. "README.md") to its embedded markdown content.
+/// Each app embeds its own copy of the 7 docs at compile time, so this lookup
+/// lives in the app crate (not in library).
+fn doc_content(name: &str) -> &'static str {
+    match name {
+        "README.md" => crate::README_CONTENT,
+        "SUPPORT.md" => crate::SUPPORT_CONTENT,
+        "LICENSE.md" => crate::LICENSE_CONTENT,
+        "COPYRIGHT.md" => crate::COPYRIGHT_CONTENT,
+        "PRIVACY.md" => crate::PRIVACY_CONTENT,
+        "SECURITY.md" => crate::SECURITY_CONTENT,
+        "CONTRIBUTING.md" => crate::CONTRIBUTING_CONTENT,
+        _ => "",
     }
 }
