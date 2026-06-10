@@ -6,7 +6,7 @@
 use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyEventKind};
-use library::lifecycle::foreground::tui_bootstrap::{bootstrap_tui, shutdown_tui, TuiBootstrapConfig};
+use library::apps::tui_bootstrap::{bootstrap_tui, shutdown_tui, TuiBootstrapConfig};
 
 mod config;
 mod logger;
@@ -57,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut last_tick = Instant::now();
 
     while !app.should_quit {
-        if library::lifecycle::foreground::tui_bootstrap::is_app_shutting_down() {
+        if library::apps::tui_bootstrap::is_app_shutting_down() {
             break;
         }
         app.check_scan_results();
