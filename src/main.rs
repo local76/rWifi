@@ -9,7 +9,6 @@ use crossterm::event::{self, Event, KeyEventKind};
 use library::lifecycle::foreground::tui_bootstrap::{bootstrap_tui, shutdown_tui, TuiBootstrapConfig};
 
 mod config;
-mod input;
 mod logger;
 mod backend;
 mod win32;
@@ -18,7 +17,7 @@ mod ui;
 
 // Re-exports for submodules
 #[cfg(not(windows))]
-pub use crate::backend::wlan::windows_sys;
+pub use library::toolkit::wlan::windows_sys;
 
 // Embedded markdown documentation files
 pub const README_CONTENT: &str = include_str!("../README.md");

@@ -13,6 +13,6 @@ pub use library::sys_info::{
 pub use library::window::{
     query_cursor_pos, get_window_rect, set_window_pos, relaunch_in_conhost_if_needed,
 };
-pub use crate::backend::wlan::*;
+pub use library::toolkit::wlan::*;
 
 pub use library::hide_console_at_startup;

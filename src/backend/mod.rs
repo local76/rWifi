@@ -2,4 +2,4 @@
 //!
 //! **Taxonomy Classification**: Platform Abstraction.
 
-pub mod wlan;
+pub use library::toolkit::wlan;
