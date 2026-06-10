@@ -78,3 +78,37 @@ pub fn generate_qr_code_lines(ssid: &str, password: &str, auth_type: &str) -> Ve
     
     lines
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ratatui::layout::Rect;
+
+    #[test]
+    fn test_centered_rect_fixed() {
+        let parent = Rect::new(0, 0, 100, 100);
+        let centered = centered_rect_fixed(20, 10, parent);
+        assert_eq!(centered.x, 40);
+        assert_eq!(centered.y, 45);
+        assert_eq!(centered.width, 20);
+        assert_eq!(centered.height, 10);
+
+        // Clamps to parent
+        let oversized = centered_rect_fixed(150, 150, parent);
+        assert_eq!(oversized.width, 100);
+        assert_eq!(oversized.height, 100);
+    }
+
+    #[test]
+    fn test_generate_qr_code_lines() {
+        let lines = generate_qr_code_lines("TestSSID", "TestPassword", "WPA2-Personal");
+        assert!(!lines.is_empty());
+        // Verify we got a line that isn't a failure message
+        assert_ne!(lines[0], "Failed to generate QR code");
+
+        let open_lines = generate_qr_code_lines("OpenSSID", "", "Open");
+        assert!(!open_lines.is_empty());
+        assert_ne!(open_lines[0], "Failed to generate QR code");
+    }
+}
+
