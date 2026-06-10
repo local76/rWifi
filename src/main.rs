@@ -17,7 +17,7 @@ mod ui;
 
 // Re-exports for submodules
 #[cfg(not(windows))]
-pub use library::toolkit::wlan::windows_sys;
+pub use crate::backend::wlan::windows_sys;
 
 // Embedded markdown documentation files
 pub const README_CONTENT: &str = include_str!("../README.md");

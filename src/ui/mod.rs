@@ -14,6 +14,7 @@ use crate::app::AppState;
 pub mod widgets;
 pub mod overlays;
 pub mod layout;
+pub mod accent_gauge;
 
 pub use library::interface::tui::design::prelude::{ThemeColors, get_theme, parse_markdown_to_lines};
 
