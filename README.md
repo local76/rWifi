@@ -2,9 +2,9 @@
 
 > A local WiFi scanner and connection manager.
 
-`scout` is a single-binary TUI for scanning nearby WiFi networks, viewing signal strength, and connecting / disconnecting. Runs on Windows and Linux with no admin elevation (uses the OS's standard WiFi API; only writes that require elevation are surfaced with a clear prompt).
+`scout` is a single-binary App for scanning nearby WiFi networks, viewing signal strength, and connecting / disconnecting. Runs on Windows and Linux with no admin elevation (uses the OS's standard WiFi API; only writes that require elevation are surfaced with a clear prompt).
 
-`scout` is part of the [local76](https://github.com/local76/local76) ecosystem and depends on [`library`](https://github.com/local76/library) for its TUI widgets and design system.
+`scout` is part of the [local76](https://github.com/local76/local76) ecosystem and depends on [`library`](https://github.com/local76/library) for its App widgets and design system.
 
 ---
 
@@ -37,7 +37,7 @@ Requires `NetworkManager` and `nmcli` on Linux.
 ## Usage
 
 ```
-scout                      # launch the TUI scanner
+scout                      # launch the App scanner
 scout scan                 # one-shot scan, print SSIDs to stdout
 scout connect <ssid>       # connect to a saved network
 scout disconnect           # disconnect the active network
@@ -46,7 +46,7 @@ scout --version
 scout --help
 ```
 
-Inside the TUI:
+Inside the App:
 
 | Key | Action |
 |---|---|
