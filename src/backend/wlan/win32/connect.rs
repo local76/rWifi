@@ -4,22 +4,16 @@
 
 use windows_sys::Win32::NetworkManagement::WiFi::*;
 use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+use library::core::xml_escape;
 use super::super::WlanNetwork;
 
-/// Helper to escape XML characters for WiFi profiles.
+/// Escape XML characters for WiFi profiles. Thin wrapper over
+/// `library::core::xml_escape::escape` (the centralized XML 1.0 strict
+/// implementation). Kept as `escape_xml` for call-site readability in the
+/// WiFi-profile-formatting code below. (Library helper for the B1
+/// cross-crate drift fix.)
 pub fn escape_xml(input: &str) -> String {
-    let mut escaped = String::with_capacity(input.len());
-    for c in input.chars() {
-        match c {
-            '&' => escaped.push_str("&amp;"),
-            '<' => escaped.push_str("&lt;"),
-            '>' => escaped.push_str("&gt;"),
-            '"' => escaped.push_str("&quot;"),
-            '\'' => escaped.push_str("&apos;"),
-            _ => escaped.push(c),
-        }
-    }
-    escaped
+    xml_escape::escape(input)
 }
 
 pub fn connect_to_wifi(ssid: &str, password: Option<&str>, net: &WlanNetwork) -> Result<(), String> {
