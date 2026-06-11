@@ -6,7 +6,7 @@
 use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyEventKind};
-use library::apps::tui_bootstrap::{bootstrap_tui, shutdown_tui, TuiBootstrapConfig};
+use library::apps::bootstrap::{init, shutdown, Config as BootstrapConfig};
 use library::apps::file_log::{log_message, set_event_log_enabled, set_log_app_name};
 
 mod config;
@@ -39,11 +39,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     set_event_log_enabled(config.enable_event_log);
     log_message("INFO", "scout application starting up...");
     
-    let mut tui_config = TuiBootstrapConfig::new("scout");
+    let mut tui_config = BootstrapConfig::new("scout");
     tui_config.borderless = config.enable_borderless;
     tui_config.size = (100, 35);
 
-    let (mut terminal, _guards) = bootstrap_tui(tui_config)?;
+    let (mut terminal, _guards) = init(tui_config)?;
 
     #[cfg(windows)]
     {
@@ -58,7 +58,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut last_tick = Instant::now();
 
     while !app.should_quit {
-        if library::apps::tui_bootstrap::is_app_shutting_down() {
+        if library::apps::bootstrap::is_app_shutting_down() {
             break;
         }
         app.check_scan_results();
@@ -124,7 +124,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // Restore terminal
-    shutdown_tui(&mut terminal)?;
+    shutdown(&mut terminal)?;
 
     Ok(())
 }
