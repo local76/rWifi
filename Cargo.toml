@@ -51,6 +51,7 @@ libc = "0.2"
 embed-resource = "2"
 
 [package.metadata.deb]
+name = "app-scout"
 maintainer = "Jeryd <jerydleuck@gmail.com>"
 assets = [
     ["target/release/scout", "usr/bin/scout", "755"],
