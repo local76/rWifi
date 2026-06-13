@@ -65,3 +65,17 @@ lto = true               # Enable Link Time Optimization
 codegen-units = 1        # Reduce codegen units to maximize size reduction
 panic = "abort"          # Remove panic unwinding code
 strip = true             # Strip symbols and debuginfo
+
+[package.metadata.generate-rpm]
+name = "app-scout"
+version = "2026.6.10-1"
+release = "1"
+arch = "x86_64"
+summary = "app-scout package"
+description = "app-scout package"
+license = "MIT"
+assets = [
+    { source = "target/release/scout", dest = "/usr/bin/scout", mode = "755" },
+    { source = "assets/brand/app_icon.png", dest = "/usr/share/pixmaps/scout.png", mode = "644" },
+    { source = "packaging/desktop/scout.desktop", dest = "/usr/share/applications/scout.desktop", mode = "644" }
+]
