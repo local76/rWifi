@@ -5,7 +5,7 @@
 use windows_sys::Win32::NetworkManagement::WiFi::*;
 use windows_sys::Win32::Foundation::ERROR_SUCCESS;
 use super::super::WlanNetwork;
-use super::connect::escape_xml;
+use super::connect_hidden::escape_xml;
 
 pub fn connect_to_enterprise_wifi(
     ssid: &str,
